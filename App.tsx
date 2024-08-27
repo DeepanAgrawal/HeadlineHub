@@ -47,6 +47,9 @@ function App(): React.JSX.Element {
 
   const fetchAndPushRandomArticles = () => {
     const localData = retrieveData(NEWS_KEY);
+    if (!localData) {
+      return;
+    }
     const filteredList = localData.filter((item: Article) => !item.isDisplayed);
 
     // Shuffle the filtered list
@@ -60,11 +63,12 @@ function App(): React.JSX.Element {
       localRandomData.current = [];
 
       setNewsArticleData([]);
+      storeData(NEWS_KEY, null);
       reset();
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    // Return the first 'count' elements
+    // Return the first 5 elements
     const randomArticles = filteredList.slice(0, 5);
     setNewsArticleData([...randomArticles, ...localRandomData.current]);
     localRandomData.current = [...randomArticles, ...localRandomData.current];
@@ -83,7 +87,9 @@ function App(): React.JSX.Element {
       [
         {
           text: OK_BTN,
-          onPress: () => {},
+          onPress: () => {
+            setNewsArticleData([]);
+          },
         },
       ],
       {cancelable: false}, // If false, clicking outside of the alert will not dismiss it
@@ -145,6 +151,7 @@ function App(): React.JSX.Element {
     fetchAndPushRandomArticles();
     clearInterval(intervalRef.current);
     intervalRef.current = null;
+    getRandomArticles();
   };
 
   return (
