@@ -34,3 +34,6 @@ A React Native app for displaying news headlines from various sources.
 1. Displays top news headlines.
 2. Allows pinning and deleting articles.
 3. Automatically refreshes news articles periodically.
+4. Manually refresh the news articles.
+5. Pin the news article at the top.
+6. Delete the news article from list.
