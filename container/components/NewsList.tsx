@@ -4,26 +4,38 @@ import {SwipeListView} from 'react-native-swipe-list-view';
 import NewsCard from './NewsCard';
 import {retrieveData, storeData} from '../Storage';
 import Separator from './Separator';
+import {Article} from '../types';
+import {DELETE, DELETE_ICON, NEWS_KEY, PIN, PIN_ICON} from '../constants';
+
+interface NewsListProps {
+  newsList?: Array<Article>;
+  deleteItem?: (data: Article) => void;
+  pinItem?: (data: Article) => void;
+}
 
 const NewsList = ({
   newsList = [],
-  deleteItem = data => {},
-  pinItem = data => {},
-}) => {
+  deleteItem = () => {},
+  pinItem = () => {},
+}: NewsListProps) => {
   const updateDisplayStatus = () => {
-    const data = retrieveData('news');
-    const updatedData = data.map(article => {
-      const isSelected = newsList.find(selected => selected.id === article.id);
-      if (isSelected) {
-        article.isDisplayed = true;
-      }
-      return article;
-    });
-    storeData('news', updatedData);
+    const data = retrieveData(NEWS_KEY);
+    if (data) {
+      const updatedData = data.map((article: Article) => {
+        const isSelected = newsList.find(
+          selected => selected.id === article.id,
+        );
+        if (isSelected) {
+          article.isDisplayed = true;
+        }
+        return article;
+      });
+      storeData(NEWS_KEY, updatedData);
+    }
   };
   updateDisplayStatus();
   return (
-    <View style={{flex: 1, width: '100%'}}>
+    <View style={styles.container}>
       <SwipeListView
         data={newsList}
         renderItem={data => (
@@ -39,11 +51,8 @@ const NewsList = ({
               onPress={() => {
                 deleteItem(data.item);
               }}>
-              <Image
-                source={require('../assets/images/delete.webp')}
-                style={styles.icon}
-              />
-              <Text style={styles.hiddenItemText}>Delete</Text>
+              <Image source={require(DELETE_ICON)} style={styles.icon} />
+              <Text style={styles.hiddenItemText}>{DELETE}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -51,11 +60,8 @@ const NewsList = ({
               onPress={() => {
                 pinItem(data.item);
               }}>
-              <Image
-                source={require('../assets/images/pin.webp')}
-                style={styles.icon}
-              />
-              <Text style={styles.hiddenItemText}>Pin</Text>
+              <Image source={require(PIN_ICON)} style={styles.icon} />
+              <Text style={styles.hiddenItemText}>{PIN}</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -66,6 +72,10 @@ const NewsList = ({
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    width: '100%',
+  },
   renderItemContainer: {
     marginVertical: 10,
   },
@@ -96,7 +106,6 @@ const styles = StyleSheet.create({
   hiddenItemButton: {
     flex: 1,
     width: '100%',
-
     padding: 10,
     justifyContent: 'center',
     alignItems: 'center',

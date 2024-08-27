@@ -3,42 +3,51 @@ import {Alert, StyleSheet, View} from 'react-native';
 
 import SplashScreen from './container/components/Splash';
 import {getData} from './container/api';
-import {GET_TOP_HEADLINES} from './container/apiConstants';
+import {
+  ERROR_MESSAGE,
+  ERROR_TITLE,
+  GET_TOP_HEADLINES,
+  NEWS_KEY,
+  OK_BTN,
+} from './container/constants';
 import NewsList from './container/components/NewsList';
 import {retrieveData, storeData} from './container/Storage';
 import Header from './container/components/Header';
 import NewsCard from './container/components/NewsCard';
 import Separator from './container/components/Separator';
+import {Article} from './container/types';
 
 function App(): React.JSX.Element {
   const [showSplash, setShowSplash] = useState(true);
-  const [newsArticleData, setNewsArticleData] = useState([]);
-  const [pinnedNewsArticle, setPinnedNewsArticle] = useState([]);
-  const localRandomData = useRef([]);
-  const pageNumber = useRef(1);
-  const intervalRef = useRef(null);
+  const [newsArticleData, setNewsArticleData] = useState<Array<Article>>([]);
+  const [pinnedNewsArticle, setPinnedNewsArticle] = useState<Array<Article>>(
+    [],
+  );
+  const localRandomData = useRef<Array<Article>>([]);
+  const pageNumber = useRef<number>(1);
+  const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
     reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getFirst10 = data => {
+  const getFirst10 = (data: Array<Article>) => {
     return data.slice(0, 10);
   };
 
-  const setArticleToStorage = data => {
-    data.forEach((article, index) => {
+  const setArticleToStorage = (data: Array<Article>) => {
+    data.forEach((article: Article, index: number) => {
       article.id = index;
       article.isDisplayed = false;
     });
-    storeData('news', data);
+    storeData(NEWS_KEY, data);
     return data;
   };
 
   const fetchAndPushRandomArticles = () => {
-    const localData = retrieveData('news');
-    const filteredList = localData.filter(item => !item.isDisplayed);
+    const localData = retrieveData(NEWS_KEY);
+    const filteredList = localData.filter((item: Article) => !item.isDisplayed);
 
     // Shuffle the filtered list
     for (let i = filteredList.length - 1; i > 0; i--) {
@@ -53,6 +62,7 @@ function App(): React.JSX.Element {
       setNewsArticleData([]);
       reset();
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
     // Return the first 'count' elements
     const randomArticles = filteredList.slice(0, 5);
@@ -68,12 +78,12 @@ function App(): React.JSX.Element {
 
   const showAlert = () => {
     Alert.alert(
-      'Alert Title', // Title of the alert
-      'Oops!! Something went wrong. Please try again later', // Message in the alert
+      ERROR_TITLE,
+      ERROR_MESSAGE,
       [
         {
-          text: 'OK',
-          onPress: () => console.log('OK Pressed'),
+          text: OK_BTN,
+          onPress: () => {},
         },
       ],
       {cancelable: false}, // If false, clicking outside of the alert will not dismiss it
@@ -89,13 +99,14 @@ function App(): React.JSX.Element {
           page: pageNumber.current,
         });
         setShowSplash(false);
-        const newsArticles = setArticleToStorage(result.articles);
+        const articlesList = result.articles;
+        const newsArticles = setArticleToStorage(articlesList);
         const first10Article = getFirst10(newsArticles);
         setNewsArticleData(first10Article);
         localRandomData.current = first10Article;
         getRandomArticles();
       } catch (e) {
-        const localNewsArticles = retrieveData('news');
+        const localNewsArticles = retrieveData(NEWS_KEY);
         if (localNewsArticles && localNewsArticles.length > 0) {
           setShowSplash(false);
           const first10Article = getFirst10(localNewsArticles);
@@ -111,7 +122,7 @@ function App(): React.JSX.Element {
     loadData();
   };
 
-  const deleteItem = article => {
+  const deleteItem = (article: Article) => {
     localRandomData.current = localRandomData.current.filter(
       item => item.id !== article.id,
     );
@@ -122,18 +133,18 @@ function App(): React.JSX.Element {
     deleteItem(article);
   };
 
-  const onPressPinItem = (article: any) => {
+  const onPressPinItem = (article: Article) => {
     const localData = pinnedNewsArticle;
     article.isPinned = true;
     localData.push(article);
     setPinnedNewsArticle(localData);
     deleteItem(article);
-    console.log('TESTING', pinnedNewsArticle);
   };
 
   const onPressRefresh = () => {
     fetchAndPushRandomArticles();
     clearInterval(intervalRef.current);
+    intervalRef.current = null;
   };
 
   return (
@@ -146,7 +157,7 @@ function App(): React.JSX.Element {
           {pinnedNewsArticle.length > 0
             ? pinnedNewsArticle.map((article, index) => {
                 return (
-                  <View style={{width: '100%'}}>
+                  <View style={styles.PinnedNewsContainer}>
                     <NewsCard data={article} key={index} />
                     <Separator />
                   </View>
@@ -169,6 +180,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     backgroundColor: 'white',
+  },
+  PinnedNewsContainer: {
+    width: '100%',
   },
 });
 

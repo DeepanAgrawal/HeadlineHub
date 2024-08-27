@@ -1,13 +1,11 @@
 import React from 'react';
 import {View, Image, StyleSheet} from 'react-native';
+import {HH_LOGO} from '../constants';
 
 const SplashScreen = () => {
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../assets/images/hh_logo.webp')}
-        style={styles.image}
-      />
+      <Image source={require(HH_LOGO)} style={styles.image} />
     </View>
   );
 };

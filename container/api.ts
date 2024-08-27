@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an Axios instance with default settings
 const api = axios.create({
-  baseURL: 'https://newsapi.org/', // Replace with your API base URL
+  baseURL: 'https://newsapi.org/',
   timeout: 10000, // Timeout for requests in milliseconds
   headers: {
     'Content-Type': 'application/json',
@@ -12,11 +12,10 @@ const api = axios.create({
 // Request interceptor to add tokens or modify requests
 api.interceptors.request.use(
   config => {
-    // Add token or other headers if needed
-    // const token = getToken(); // Implement getToken function if you use authentication
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    // Add logic here to add auth token in headers
+    // Add other headers if needed
+
+    // config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
   error => {
@@ -31,7 +30,6 @@ api.interceptors.response.use(
   },
   error => {
     // Handle errors globally
-    console.error('API call error:', error.response || error.message);
     return Promise.reject(error);
   },
 );
@@ -47,21 +45,11 @@ export const getData = async (url: string, apiParams = {}) => {
     ...apiParams,
   };
   try {
-    const fullUrl = axios.getUri({
-      url,
-      params,
-    });
-
-    console.log('DEEPAN CHECK THE FULL URL', fullUrl);
-
     const response = await api.get(url, {
       params,
     });
-    console.log('DEEPAN CHECK THE RESPONSE', response.articles.length);
     return response;
   } catch (error) {
-    console.log('Error fetching data:', error);
-    console.error('Error fetching data:', error);
     throw error;
   }
 };

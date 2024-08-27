@@ -1,18 +1,25 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
 import {convertTo12HourFormat} from '../helper';
+import {Article} from '../types';
+import {PINNED_ICON, PINNED_ON_TOP} from '../constants';
 
-const NewsCard = (props: Any) => {
+interface NewsCardProps {
+  data: NewsCardData | Article;
+}
+
+interface NewsCardData {
+  item: Article;
+}
+
+const NewsCard = (props: NewsCardProps) => {
   const data = props.data.item ?? props.data;
   return (
     <View style={styles.container}>
       {data.isPinned ? (
         <View style={styles.pinnedContainer}>
-          <Image
-            source={require('../assets/images/pinned.webp')}
-            style={styles.pinIcon}
-          />
-          <Text style={styles.pinnedText}>Pinned on top</Text>
+          <Image source={require(PINNED_ICON)} style={styles.pinIcon} />
+          <Text style={styles.pinnedText}>{PINNED_ON_TOP}</Text>
         </View>
       ) : null}
 
