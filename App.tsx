@@ -14,19 +14,13 @@ function App(): React.JSX.Element {
   const [showSplash, setShowSplash] = useState(true);
   const [newsArticleData, setNewsArticleData] = useState([]);
   const [pinnedNewsArticle, setPinnedNewsArticle] = useState([]);
-  const [error, setError] = useState(null);
   const localRandomData = useRef([]);
   const pageNumber = useRef(1);
   const intervalRef = useRef(null);
 
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setShowSplash(false);
-  //   }, 2000);
-  // }, []);
-
   useEffect(() => {
     reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getFirst10 = data => {
@@ -45,14 +39,17 @@ function App(): React.JSX.Element {
   const fetchAndPushRandomArticles = () => {
     const localData = retrieveData('news');
     const filteredList = localData.filter(item => !item.isDisplayed);
+
     // Shuffle the filtered list
     for (let i = filteredList.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [filteredList[i], filteredList[j]] = [filteredList[j], filteredList[i]];
     }
+
     if (localRandomData.current.length === 50 * pageNumber.current) {
       pageNumber.current = pageNumber.current + 1;
       localRandomData.current = [];
+
       setNewsArticleData([]);
       reset();
       clearInterval(intervalRef.current);
@@ -61,11 +58,6 @@ function App(): React.JSX.Element {
     const randomArticles = filteredList.slice(0, 5);
     setNewsArticleData([...randomArticles, ...localRandomData.current]);
     localRandomData.current = [...randomArticles, ...localRandomData.current];
-    console.log(
-      'DATA SHOWN LENGTH',
-      localRandomData.current.length,
-      pageNumber.current,
-    );
   };
 
   const getRandomArticles = () => {
@@ -104,7 +96,7 @@ function App(): React.JSX.Element {
         getRandomArticles();
       } catch (e) {
         const localNewsArticles = retrieveData('news');
-        if (localNewsArticles.length > 0) {
+        if (localNewsArticles && localNewsArticles.length > 0) {
           setShowSplash(false);
           const first10Article = getFirst10(localNewsArticles);
           setNewsArticleData(first10Article);
@@ -113,8 +105,6 @@ function App(): React.JSX.Element {
         } else {
           showAlert();
         }
-      } finally {
-        setLoading(false);
       }
     };
 
